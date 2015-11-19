@@ -42,7 +42,8 @@ class FixedLength extends \Twig_Extension
      *   What value to use as indicator for chunks of omitted pages.
      *
      * @return array
-     *   Array of page numbers to display. Omissions are indicated as -1.
+     *   Array of page numbers to display. Chunks of omitted pages are
+     *   indicated as -1 by default, or the value you provided.
      */
     public function determinePaginationData(
         $lastPage,
