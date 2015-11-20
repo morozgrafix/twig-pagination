@@ -86,6 +86,9 @@ final class FixedLength extends AbstractPaginationBehaviour
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getPaginationData()
     {
         // If the total number of pages is less than the maximum number of
