@@ -151,7 +151,8 @@ final class FixedLength extends AbstractPaginationBehaviour
     private function getPaginationDataWithSingleOmittedChunk()
     {
         // Check if we're working from the first page to the last page, or
-        // the other way around.
+        // the other way around. If omitted chunk is near the last page work
+        // from LTR, otherwise work RTL.
         if ($this->hasSingleOmittedChunkNearLastPage()) {
 
             // Determine where the omitted pages will be.
