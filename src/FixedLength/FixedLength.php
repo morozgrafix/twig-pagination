@@ -160,30 +160,19 @@ final class FixedLength extends AbstractPaginationBehaviour
 
             // Determine where the omitted pages will be.
             $rest = $this->maximumVisible - $this->currentPage;
-            $omittedPagesPosition = ((int) ceil($rest / 2)) + $this->currentPage;
-
-            // Fill from the first page until the the position of the omitted
-            // chunk.
-            $pagesLeft = range(1, $omittedPagesPosition - 1);
-
-            // Pick up from the first page visible after the omitted chunk and
-            // fill until the last page.
-            $continueFromPage = $this->totalPages - ($this->maximumVisible - $omittedPagesPosition) + 1;
-            $pagesRight = range($continueFromPage, $this->totalPages);
+            $omitPagesFrom = ((int) ceil($rest / 2)) + $this->currentPage;
+            $omitPagesTo = $this->totalPages - ($this->maximumVisible - $omitPagesFrom);
 
         } else {
 
             // Determine where the omitted pages will be.
-            $rest = $this->maximumVisible - ($this->totalPages - $this->currentPage) + 1;
-            $omittedPagesPosition = $this->currentPage - (((int) ceil($rest / 2))  - 1);
-
-            // Fill from the position of the omitted chunk until the last page.
-            $pagesRight = range($omittedPagesPosition + 1, $this->totalPages);
-
-            // Fill from the first page until the omitted chunk.
-            $stopAtPage = $this->maximumVisible - count($pagesRight) - 1;
-            $pagesLeft = range(1, $stopAtPage);
+            $rest = $this->maximumVisible - ($this->totalPages - $this->currentPage);
+            $omitPagesFrom = (int) ceil($rest / 2);
+            $omitPagesTo = ($this->currentPage - ($rest - $omitPagesFrom));
         }
+
+        $pagesLeft = range(1, $omitPagesFrom - 1);
+        $pagesRight = range($omitPagesTo + 1, $this->totalPages);
 
         // Merge left side, omitted pages indicator, and right side together.
         return array_merge(
