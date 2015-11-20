@@ -44,79 +44,57 @@ class FixedLengthTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Tests that setting the 1st page as current page omits a single chunk of
-     * pages at the right position.
-     */
-    public function testSingleOmissionCurrentPageIsFirstPage()
-    {
-        $this->behaviour = $this->behaviour
-            ->withTotalPages(20)
-            ->withCurrentPage(1)
-            ->withMaximumVisible(15);
-
-        $expected = [1, 2, 3, 4, 5, 6, 7, '...', 14, 15, 16, 17, 18, 19, 20];
-        $actual = $this->behaviour->getPaginationData();
-
-        $this->assertEquals($expected, $actual);
-    }
-
-    /**
-     * Tests that setting the "single omission breaking point" near the first
-     * page as current page omits a single chunk of pages at the right
-     * position.
+     * @param int $totalPages
+     * @param int $currentPage
+     * @param int $maximumVisible
+     * @param array $expected
      *
-     * In the case of 15 visible pages, we can omit a single chunk of pages up
-     * until the 8th page.
+     * @dataProvider paginationTestDataProvider
      */
-    public function testSingleOmissionCurrentPageIsBreakpointLtr()
-    {
+    public function testPaginationData(
+        $totalPages,
+        $currentPage,
+        $maximumVisible,
+        $expected
+    ) {
         $this->behaviour = $this->behaviour
-            ->withTotalPages(20)
-            ->withCurrentPage(8)
-            ->withMaximumVisible(15);
-
-        $expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, '...', 18, 19, 20];
+            ->withTotalPages($totalPages)
+            ->withCurrentPage($currentPage)
+            ->withMaximumVisible($maximumVisible);
 
         $actual = $this->behaviour->getPaginationData();
 
         $this->assertEquals($expected, $actual);
     }
 
-    /**
-     * Tests that setting the last page as current page omits a single chunk of
-     * pages at the right position.
-     */
-    public function testSingleOmissionCurrentPageIsLastPage()
+    public function paginationTestDataProvider()
     {
-        $this->behaviour = $this->behaviour
-            ->withTotalPages(20)
-            ->withCurrentPage(20)
-            ->withMaximumVisible(15);
-
-        $expected = [1, 2, 3, 4, 5, 6, 7, '...', 14, 15, 16, 17, 18, 19, 20];
-        $actual = $this->behaviour->getPaginationData();
-
-        $this->assertEquals($expected, $actual);
-    }
-
-    /**
-     * Tests that setting the "single omission breaking point" near the last
-     * page as current page omits a single chunk of pages at the right
-     * position.
-     *
-     * In the case of 15 visible pages and 20 pages total, we can omit a single
-     * chunk of pages starting from the 13th page.
-     */
-    public function testSingleOmissionCurrentPageIsBreakpointRtl()
-    {
-        $this->behaviour = $this->behaviour
-            ->withTotalPages(20)
-            ->withCurrentPage(13)
-            ->withMaximumVisible(15);
-
-        $expected = [1, 2, 3, '...', 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-        $actual = $this->behaviour->getPaginationData();
-
-        $this->assertEquals($expected, $actual);
+        return [
+            // 20 pages, 15 visible
+            [
+                20,
+                1,
+                15,
+                [1, 2, 3, 4, 5, 6, 7, '...', 14, 15, 16, 17, 18, 19, 20],
+            ],
+            [
+                20,
+                8,
+                15,
+                [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, '...', 18, 19, 20],
+            ],
+            [
+                20,
+                13,
+                15,
+                [1, 2, 3, '...', 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+            ],
+            [
+                20,
+                20,
+                15,
+                [1, 2, 3, 4, 5, 6, 7, '...', 14, 15, 16, 17, 18, 19, 20],
+            ],
+        ];
     }
 }
