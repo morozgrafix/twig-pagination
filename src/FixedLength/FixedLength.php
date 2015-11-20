@@ -29,11 +29,22 @@ final class FixedLength extends AbstractPaginationBehaviour
     public function __construct(
         $totalPages,
         $currentPage,
-        $maximumVisible = 15,
+        $maximumVisible,
         $omittedPagesIndicator = -1
     ) {
         parent::__construct($totalPages, $currentPage, $omittedPagesIndicator);
         $this->setMaximumVisible($maximumVisible);
+    }
+
+    /**
+     * @param int $maximumVisible
+     * @return static
+     */
+    public function withMaximumVisible($maximumVisible)
+    {
+        $c = clone $this;
+        $c->setMaximumVisible($maximumVisible);
+        return $c;
     }
 
     /**
@@ -44,6 +55,14 @@ final class FixedLength extends AbstractPaginationBehaviour
         $maximumVisible = (int) $maximumVisible;
         $this->guardMaximumVisibleMinimumValue($maximumVisible);
         $this->maximumVisible = $maximumVisible;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMaximumVisible()
+    {
+        return $this->maximumVisible;
     }
 
     /**
@@ -105,7 +124,7 @@ final class FixedLength extends AbstractPaginationBehaviour
     /**
      * @return bool
      */
-    private function hasSingleOmittedChunk()
+    public function hasSingleOmittedChunk()
     {
         return $this->hasSingleOmittedChunkNearLastPage() || $this->hasSingleOmittedChunkNearStartPage();
     }
@@ -136,42 +155,37 @@ final class FixedLength extends AbstractPaginationBehaviour
         $fillLtr = $this->hasSingleOmittedChunkNearLastPage();
 
         if ($fillLtr) {
-            // Determine where the omitted pages will be, and fill from the
-            // start page until that point.
+
+            // Determine where the omitted pages will be.
             $rest = $this->maximumVisible - $this->currentPage;
-            $omittedPagesPosition = (int) ceil($rest / 2);
-            $pages = range(1, $omittedPagesPosition - 1);
+            $omittedPagesPosition = ((int) ceil($rest / 2)) + $this->currentPage;
+
+            // Fill from the first page until the the position of the omitted
+            // chunk.
+            $pagesLeft = range(1, $omittedPagesPosition - 1);
+
+            // Pick up from the first page visible after the omitted chunk and
+            // fill until the last page.
+            $continueFromPage = $this->totalPages - ($this->maximumVisible - $omittedPagesPosition) + 1;
+            $pagesRight = range($continueFromPage, $this->totalPages);
+
         } else {
-            // Determine where the omitted pages will be, and fill from
-            // that point until the last page.
-            $rest = $this->maximumVisible - ($this->totalPages - $this->currentPage + 1);
-            $omittedPagesPosition = (int) floor($rest / 2);
-            $pages = range($omittedPagesPosition + 1, $this->totalPages);
+
+            // Determine where the omitted pages will be.
+            $rest = $this->maximumVisible - ($this->totalPages - $this->currentPage) + 1;
+            $omittedPagesPosition = $this->currentPage - (((int) ceil($rest / 2))  - 1);
+
+            // Fill from the position of the omitted chunk until the last page.
+            $pagesRight = range($omittedPagesPosition + 1, $this->totalPages);
+
+            // Fill from the first page until the omitted chunk.
+            $stopAtPage = $this->maximumVisible - count($pagesRight) - 1;
+            $pagesLeft = range(1, $stopAtPage);
         }
 
-        // Set the correct index for each page. Eg. Page 1 should be at
-        // index 1, page 5 at index 5, etc...
-        $pages = array_combine($pages, $pages);
+        $pagesLeft[] = $this->omittedPagesIndicator;
 
-        // Add the indicator for the omitted pages.
-        $pages[$omittedPagesPosition] = $this->omittedPagesIndicator;
-
-        if ($fillLtr) {
-            // Pages after the chunk of omitted pages.
-            $restPages = range($omittedPagesPosition + 1, $this->maximumVisible);
-        } else {
-            // Pages before the chunk of omitted pages.
-            $restPages = range(1, $omittedPagesPosition - 1);
-        }
-
-        // Set the correct index for the rest of the pages.
-        $restPages = array_combine($restPages, $restPages);
-
-        // Merge everything together.
-        $pages = array_merge($pages, $restPages);
-
-        // Reset the indexes to a 0-based index and we're done.
-        return array_values($pages);
+        return array_merge($pagesLeft, $pagesRight);
     }
 
     /**
