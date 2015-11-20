@@ -152,9 +152,7 @@ final class FixedLength extends AbstractPaginationBehaviour
     {
         // Check if we're working from the first page to the last page, or
         // the other way around.
-        $fillLtr = $this->hasSingleOmittedChunkNearLastPage();
-
-        if ($fillLtr) {
+        if ($this->hasSingleOmittedChunkNearLastPage()) {
 
             // Determine where the omitted pages will be.
             $rest = $this->maximumVisible - $this->currentPage;
