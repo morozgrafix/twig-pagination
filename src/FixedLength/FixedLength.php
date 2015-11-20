@@ -183,9 +183,12 @@ final class FixedLength extends AbstractPaginationBehaviour
             $pagesLeft = range(1, $stopAtPage);
         }
 
-        $pagesLeft[] = $this->omittedPagesIndicator;
-
-        return array_merge($pagesLeft, $pagesRight);
+        // Merge left side, omitted pages indicator, and right side together.
+        return array_merge(
+            $pagesLeft,
+            [$this->omittedPagesIndicator],
+            $pagesRight
+        );
     }
 
     /**
