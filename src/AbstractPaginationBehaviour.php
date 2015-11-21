@@ -99,7 +99,7 @@ abstract class AbstractPaginationBehaviour implements PaginationBehaviourInterfa
      */
     public function getCurrentPage()
     {
-       return $this->currentPage;
+        return $this->currentPage;
     }
 
     /**

@@ -153,24 +153,19 @@ final class FixedLength extends AbstractPaginationBehaviour
      */
     private function getPaginationDataWithSingleOmittedChunk()
     {
-        // Check if we're working from the first page to the last page, or
-        // the other way around. If omitted chunk is near the last page work
-        // from LTR, otherwise work RTL.
+        // Determine where the omitted chunk of pages will be.
         if ($this->hasSingleOmittedChunkNearLastPage()) {
-
-            // Determine where the omitted pages will be.
             $rest = $this->maximumVisible - $this->currentPage;
             $omitPagesFrom = ((int) ceil($rest / 2)) + $this->currentPage;
             $omitPagesTo = $this->totalPages - ($this->maximumVisible - $omitPagesFrom);
-
         } else {
-
-            // Determine where the omitted pages will be.
             $rest = $this->maximumVisible - ($this->totalPages - $this->currentPage);
             $omitPagesFrom = (int) ceil($rest / 2);
             $omitPagesTo = ($this->currentPage - ($rest - $omitPagesFrom));
         }
 
+        // Fill each side of the pagination data, around the omitted chunk of
+        // pages.
         $pagesLeft = range(1, $omitPagesFrom - 1);
         $pagesRight = range($omitPagesTo + 1, $this->totalPages);
 
