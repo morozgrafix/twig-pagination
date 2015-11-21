@@ -5,45 +5,6 @@ namespace DevotedCode\Twig\Pagination\FixedLength;
 class FixedLengthTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var FixedLength
-     */
-    private $behaviour;
-
-    public function setUp()
-    {
-        // Set the omission indicator to 3 dots for better test legibility.
-        // Total pages, current page, and minimum visible should be
-        // configured per test.
-        $this->behaviour = new FixedLength(1, 1, 7, '...');
-    }
-
-    public function testTotalShorterThanMaximumVisible()
-    {
-        $this->behaviour = $this->behaviour
-            ->withTotalPages(11)
-            ->withCurrentPage(6)
-            ->withMaximumVisible(12);
-
-        $expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-        $actual = $this->behaviour->getPaginationData();
-
-        $this->assertEquals($expected, $actual);
-    }
-
-    public function testTotalEqualToMaximumVisible()
-    {
-        $this->behaviour = $this->behaviour
-            ->withTotalPages(11)
-            ->withCurrentPage(6)
-            ->withMaximumVisible(11);
-
-        $expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-        $actual = $this->behaviour->getPaginationData();
-
-        $this->assertEquals($expected, $actual);
-    }
-
-    /**
      * @param int $totalPages
      * @param int $currentPage
      * @param int $maximumVisible
@@ -57,25 +18,95 @@ class FixedLengthTest extends \PHPUnit_Framework_TestCase
         $maximumVisible,
         $expected
     ) {
-        $this->behaviour = $this->behaviour
-            ->withTotalPages($totalPages)
-            ->withCurrentPage($currentPage)
-            ->withMaximumVisible($maximumVisible);
+        $expectedMaxVisible = $totalPages > $maximumVisible ? $maximumVisible : $totalPages;
+        $expectedLength = count($expected);
+        if ($expectedLength != $expectedMaxVisible) {
+            throw new \LogicException(
+                sprintf(
+                    'The provided expected pagination length (%d) is incorrect (should be %d).',
+                    $expectedLength,
+                    $expectedMaxVisible
+                )
+            );
+        }
 
-        $actual = $this->behaviour->getPaginationData();
+        // Set the omission indicator to 3 dots for better test legibility.
+        // Total pages, current page, and minimum visible should be
+        // configured per test.
+        $behaviour = new FixedLength($totalPages, $currentPage, $maximumVisible, '...');
+        $actual = $behaviour->getPaginationData();
 
-        $this->assertEquals($expected, $actual);
+        if ($actual !== $expected) {
+            $this->fail(
+                'Actual pagination data did not match expected pagination data:' . PHP_EOL .
+                'Total pages: ' . $totalPages . PHP_EOL .
+                'Current page: ' . $currentPage . PHP_EOL .
+                'Maximum visible pages: ' . $maximumVisible . PHP_EOL .
+                'Expected: [' . implode(', ', $expected) . ']' . PHP_EOL .
+                'Actual: [' . implode(', ', $actual) . ']' . PHP_EOL
+            );
+        }
     }
 
     public function paginationTestDataProvider()
     {
         return [
+            // Max visible more or equal to total pages.
+            [
+                11,
+                1,
+                12,
+                [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+            ],
+            [
+                11,
+                1,
+                11,
+                [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+            ],
+
             // 20 pages, 15 visible
             [
                 20,
                 1,
                 15,
                 [1, 2, 3, 4, 5, 6, 7, '...', 14, 15, 16, 17, 18, 19, 20],
+            ],
+            [
+                20,
+                2,
+                15,
+                [1, 2, 3, 4, 5, 6, 7, 8, '...', 15, 16, 17, 18, 19, 20],
+            ],
+            [
+                20,
+                3,
+                15,
+                [1, 2, 3, 4, 5, 6, 7, 8, '...', 15, 16, 17, 18, 19, 20],
+            ],
+            [
+                20,
+                4,
+                15,
+                [1, 2, 3, 4, 5, 6, 7, 8, 9, '...', 16, 17, 18, 19, 20],
+            ],
+            [
+                20,
+                5,
+                15,
+                [1, 2, 3, 4, 5, 6, 7, 8, 9, '...', 16, 17, 18, 19, 20],
+            ],
+            [
+                20,
+                6,
+                15,
+                [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, '...', 17, 18, 19, 20],
+            ],
+            [
+                20,
+                7,
+                15,
+                [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, '...', 17, 18, 19, 20],
             ],
             [
                 20,
@@ -88,6 +119,42 @@ class FixedLengthTest extends \PHPUnit_Framework_TestCase
                 13,
                 15,
                 [1, 2, 3, '...', 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+            ],
+            [
+                20,
+                14,
+                15,
+                [1, 2, 3, 4, '...', 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+            ],
+            [
+                20,
+                15,
+                15,
+                [1, 2, 3, 4, '...', 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+            ],
+            [
+                20,
+                16,
+                15,
+                [1, 2, 3, 4, 5, '...', 12, 13, 14, 15, 16, 17, 18, 19, 20],
+            ],
+            [
+                20,
+                17,
+                15,
+                [1, 2, 3, 4, 5, '...', 12, 13, 14, 15, 16, 17, 18, 19, 20],
+            ],
+            [
+                20,
+                18,
+                15,
+                [1, 2, 3, 4, 5, 6, '...', 13, 14, 15, 16, 17, 18, 19, 20],
+            ],
+            [
+                20,
+                19,
+                15,
+                [1, 2, 3, 4, 5, 6, '...', 13, 14, 15, 16, 17, 18, 19, 20],
             ],
             [
                 20,
