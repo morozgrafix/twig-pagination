@@ -214,7 +214,7 @@ abstract class AbstractPaginationBehaviour implements PaginationBehaviourInterfa
         if (is_int($indicator) &&
             !is_null($this->totalPages) &&
             !is_null($this->currentPage) &&
-            $indicator >= $this->currentPage &&
+            $indicator >= 1 &&
             $indicator <= $this->totalPages) {
             throw new \InvalidArgumentException(
                 sprintf(
