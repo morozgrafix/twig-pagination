@@ -105,7 +105,7 @@ final class FixedLength extends AbstractPaginationBehaviour
 
         // Otherwise omit two chunks of pages, one on each side of the current
         // page.
-        return $this->getPaginationDataWithMultipleOmittedChunks();
+        return $this->getPaginationDataWithTwoOmittedChunks();
     }
 
     /**
@@ -121,7 +121,7 @@ final class FixedLength extends AbstractPaginationBehaviour
      */
     private function getSingleOmissionBreakpoint()
     {
-        return (int) ceil($this->maximumVisible / 2);
+        return (int) floor($this->maximumVisible / 2) + 1;
     }
 
     /**
@@ -180,9 +180,43 @@ final class FixedLength extends AbstractPaginationBehaviour
     /**
      * @return array
      */
-    private function getPaginationDataWithMultipleOmittedChunks()
+    private function getPaginationDataWithTwoOmittedChunks()
     {
-        // @todo Implement...
-        return array();
+        $visibleExceptForCurrent = $this->maximumVisible - 1;
+
+        if ($this->currentPage <= ceil($this->totalPages / 2)) {
+            $visibleLeft = ceil($visibleExceptForCurrent / 2);
+            $visibleRight = floor($visibleExceptForCurrent / 2);
+        } else {
+            $visibleLeft = floor($visibleExceptForCurrent / 2);
+            $visibleRight = ceil($visibleExceptForCurrent / 2);
+        }
+
+        // Put the left chunk of omitted pages in the middle of the visible
+        // pages to the left of the current page.
+        $omitPagesLeftFrom = floor($visibleLeft / 2) + 1;
+        $omitPagesLeftTo = $this->currentPage - ($visibleLeft - $omitPagesLeftFrom) - 1;
+
+        // Put the right chunk of omitted pages in the middle of the visible
+        // pages to the right of the current page.
+        $omitPagesRightFrom = ceil($visibleRight / 2) + $this->currentPage;
+        $omitPagesRightTo = $this->totalPages - ($visibleRight - ($omitPagesRightFrom - $this->currentPage));
+
+        // Fill the left side of pages up to the first omitted chunk, the pages
+        // in the middle up to the second omitted chunk, and the right side of
+        // pages.
+        $pagesLeft = range(1, $omitPagesLeftFrom - 1);
+        $pagesCenter = range($omitPagesLeftTo + 1, $omitPagesRightFrom - 1);
+        $pagesRight = range($omitPagesRightTo + 1, $this->totalPages);
+
+        // Merge everything together with omitted chunks of pages in between
+        // them.
+        return array_merge(
+            $pagesLeft,
+            [$this->omittedPagesIndicator],
+            $pagesCenter,
+            [$this->omittedPagesIndicator],
+            $pagesRight
+        );
     }
 }

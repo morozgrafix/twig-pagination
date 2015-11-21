@@ -65,7 +65,7 @@ class FixedLengthTest extends \PHPUnit_Framework_TestCase
         $behaviour = new FixedLength($totalPages, $currentPage, $maximumVisible, '...');
         $actual = $behaviour->getPaginationData();
 
-        if ($actual !== $expected) {
+        if ($actual != $expected) {
             $this->fail(
                 'Actual pagination data did not match expected pagination data:' . PHP_EOL .
                 'Total pages: ' . $totalPages . PHP_EOL .
@@ -80,7 +80,7 @@ class FixedLengthTest extends \PHPUnit_Framework_TestCase
     public function paginationTestDataProvider()
     {
         return [
-            // Max visible more or equal to total pages.
+            // Maximum visible is more or equal to total pages.
             [
                 11,
                 1,
@@ -94,7 +94,7 @@ class FixedLengthTest extends \PHPUnit_Framework_TestCase
                 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
             ],
 
-            // 20 pages, 15 visible
+            // 20 pages, 15 visible (all possibilities).
             [
                 20,
                 1,
@@ -145,6 +145,30 @@ class FixedLengthTest extends \PHPUnit_Framework_TestCase
             ],
             [
                 20,
+                9,
+                15,
+                [1, 2, 3, '...', 6, 7, 8, 9, 10, 11, 12, '...', 18, 19, 20],
+            ],
+            [
+                20,
+                10,
+                15,
+                [1, 2, 3, '...', 7, 8, 9, 10, 11, 12, 13, '...', 18, 19, 20],
+            ],
+            [
+                20,
+                11,
+                15,
+                [1, 2, 3, '...', 8, 9, 10, 11, 12, 13, 14, '...', 18, 19, 20],
+            ],
+            [
+                20,
+                12,
+                15,
+                [1, 2, 3, '...', 9, 10, 11, 12, 13, 14, 15, '...', 18, 19, 20],
+            ],
+            [
+                20,
                 13,
                 15,
                 [1, 2, 3, '...', 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
@@ -192,7 +216,8 @@ class FixedLengthTest extends \PHPUnit_Framework_TestCase
                 [1, 2, 3, 4, 5, 6, 7, '...', 14, 15, 16, 17, 18, 19, 20],
             ],
 
-            // 99999 pages, 7 visible
+            // 99999 pages, 7 visible. (All single omitted chunk possibilities,
+            // and some test samples in between.)
             [
                 99999,
                 1,
@@ -218,6 +243,18 @@ class FixedLengthTest extends \PHPUnit_Framework_TestCase
                 [1, 2, 3, 4, 5, '...', 99999]
             ],
             [
+                9999,
+                1000,
+                7,
+                [1, '...', 999, 1000, 1001, '...', 9999],
+            ],
+            [
+                9999,
+                2345,
+                7,
+                [1, '...', 2344, 2345, 2346, '...', 9999],
+            ],
+            [
                 99999,
                 99996,
                 7,
@@ -240,6 +277,72 @@ class FixedLengthTest extends \PHPUnit_Framework_TestCase
                 99999,
                 7,
                 [1, 2, 3, '...', 99997, 99998, 99999]
+            ],
+
+            // 100 pages, 10 (even!) visible. (All single omitted chunk
+            // possibilities, and some test cases in between.)
+            [
+                100,
+                1,
+                10,
+                [1, 2, 3, 4, 5, '...', 97, 98, 99, 100],
+            ],
+            [
+                100,
+                2,
+                10,
+                [1, 2, 3, 4, 5, '...', 97, 98, 99, 100],
+            ],
+            [
+                100,
+                3,
+                10,
+                [1, 2, 3, 4, 5, 6, '...', 98, 99, 100],
+            ],
+            [
+                100,
+                4,
+                10,
+                [1, 2, 3, 4, 5, 6, '...', 98, 99, 100],
+            ],
+            [
+                100,
+                5,
+                10,
+                [1, 2, 3, 4, 5, 6, 7, '...', 99, 100],
+            ],
+            [
+                100,
+                6,
+                10,
+                [1, 2, 3, 4, 5, 6, 7, '...', 99, 100],
+            ],
+            [
+                100,
+                7,
+                10,
+                [1, 2, '...', 5, 6, 7, 8, '...', 99, 100],
+            ],
+            [
+                100,
+                46,
+                10,
+                [1, 2, '...', 44, 45, 46, 47, '...', 99, 100],
+            ],
+            [
+                // Note that now that the current page is higher than 50,
+                // there's 2 pages to the right of the current page and only
+                // one to the left, instead of the other way around before 50.
+                100,
+                73,
+                10,
+                [1, 2, '...', 72, 73, 74, 75, '...', 99, 100],
+            ],
+            [
+                100,
+                100,
+                10,
+                [1, 2, 3, 4, '...', 96, 97, 98, 99, 100],
             ],
         ];
     }
