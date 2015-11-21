@@ -4,6 +4,15 @@ namespace DevotedCode\Twig\Pagination\FixedLength;
 
 class FixedLengthTest extends \PHPUnit_Framework_TestCase
 {
+    public function testMaximumVisibleMinimumValue()
+    {
+        $behaviour = new FixedLength(1, 1, 7);
+
+        // Maximum visible should be at least 7.
+        $this->setExpectedException(\InvalidArgumentException::class);
+        $behaviour->withMaximumVisible(6);
+    }
+
     /**
      * @param int $totalPages
      * @param int $currentPage
