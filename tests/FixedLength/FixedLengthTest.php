@@ -11,19 +11,19 @@ class FixedLengthTest extends \PHPUnit_Framework_TestCase
             'Maximum of number of visible pages (6) should be at least 7.'
         );
 
-        new FixedLength(1, 1, 6);
+        new FixedLength(6);
     }
 
     public function testMaximumVisibleCanBeUpdated()
     {
-        $behaviour = new FixedLength(1, 1, 7);
+        $behaviour = new FixedLength(7);
         $behaviour = $behaviour->withMaximumVisible(10);
         $this->assertEquals(10, $behaviour->getMaximumVisible());
     }
 
     public function testMaximumVisibleCanNotBeLoweredToLessThanMinimumValue()
     {
-        $behaviour = new FixedLength(1, 1, 7);
+        $behaviour = new FixedLength(7);
 
         $this->setExpectedException(
             \InvalidArgumentException::class,
@@ -31,6 +31,42 @@ class FixedLengthTest extends \PHPUnit_Framework_TestCase
         );
 
         $behaviour->withMaximumVisible(6);
+    }
+
+    public function testTotalPagesMinimumValue()
+    {
+        $behaviour = new FixedLength(7);
+
+        $this->setExpectedException(
+            \InvalidArgumentException::class,
+            'Total number of pages (0) should not be lower than 1.'
+        );
+
+        $behaviour->getPaginationData(0, 1);
+    }
+
+    public function testCurrentPageMinimumValue()
+    {
+        $behaviour = new FixedLength(7);
+
+        $this->setExpectedException(
+            \InvalidArgumentException::class,
+            'Current page (0) should not be lower than 1.'
+        );
+
+        $behaviour->getPaginationData(10, 0);
+    }
+
+    public function testCurrentPageExistsInTotalPages()
+    {
+        $behaviour = new FixedLength(7);
+
+        $this->setExpectedException(
+            \InvalidArgumentException::class,
+            'Current page (11) should not be higher than total number of pages (10).'
+        );
+
+        $behaviour->getPaginationData(10, 11);
     }
 
     /**
@@ -60,10 +96,12 @@ class FixedLengthTest extends \PHPUnit_Framework_TestCase
         }
 
         // Set the omission indicator to 3 dots for better test legibility.
-        // Total pages, current page, and minimum visible should be
+        // Total pages, current page, and maximum visible should be
         // configured per test.
-        $behaviour = new FixedLength($totalPages, $currentPage, $maximumVisible, '...');
-        $actual = $behaviour->getPaginationData();
+        $behaviour = (new FixedLength($maximumVisible))
+            ->withOmittedPagesIndicator('...');
+
+        $actual = $behaviour->getPaginationData($totalPages, $currentPage);
 
         if ($actual != $expected) {
             $this->fail(

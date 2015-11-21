@@ -4,8 +4,9 @@ namespace DevotedCode\Twig\Pagination;
 
 class MockPaginationBehaviour extends AbstractPaginationBehaviour
 {
-    public function getPaginationData()
+    public function getPaginationData($totalPages, $currentPage)
     {
+        $this->guardTotalPagesAndCurrentPageAreValid($totalPages, $currentPage);
         return [];
     }
 }

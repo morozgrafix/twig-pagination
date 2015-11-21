@@ -5,102 +5,9 @@ namespace DevotedCode\Twig\Pagination;
 abstract class AbstractPaginationBehaviour implements PaginationBehaviourInterface
 {
     /**
-     * @var int
-     */
-    protected $totalPages;
-
-    /**
-     * @var int
-     */
-    protected $currentPage;
-
-    /**
      * @var int|string
      */
-    protected $omittedPagesIndicator;
-
-    /**
-     * @param int $totalPages
-     * @param int $currentPage
-     * @param int|string $omittedPagesIndicator
-     */
-    public function __construct(
-        $totalPages,
-        $currentPage,
-        $omittedPagesIndicator = -1
-    ) {
-        $this->setTotalPages($totalPages);
-        $this->setCurrentPage($currentPage);
-        $this->setOmittedPagesIndicator($omittedPagesIndicator);
-    }
-
-    /**
-     * @param int $totalPages
-     * @return static
-     */
-    public function withTotalPages($totalPages)
-    {
-        $c = clone $this;
-        $c->setTotalPages($totalPages);
-        return $c;
-    }
-
-    /**
-     * @param int $totalPages
-     */
-    protected function setTotalPages($totalPages)
-    {
-        $totalPages = (int) $totalPages;
-        $this->guardTotalPagesMinimumValue($totalPages);
-
-        if (!is_null($this->currentPage)) {
-            $this->guardCurrentPageLowerThanTotalPages($this->currentPage, $totalPages);
-        }
-
-        $this->totalPages = $totalPages;
-    }
-
-    /**
-     * @return int
-     */
-    public function getTotalPages()
-    {
-        return $this->totalPages;
-    }
-
-    /**
-     * @param $currentPage
-     * @return static
-     */
-    public function withCurrentPage($currentPage)
-    {
-        $c = clone $this;
-        $c->setCurrentPage($currentPage);
-        return $c;
-    }
-
-    /**
-     * @param int $currentPage
-     */
-    protected function setCurrentPage($currentPage)
-    {
-        $currentPage = (int) $currentPage;
-        $this->guardCurrentPageMinimumValue($currentPage);
-
-        if (!is_null($this->totalPages)) {
-            $this->guardCurrentPageLowerThanTotalPages($currentPage, $this->totalPages);
-        }
-
-        $this->currentPage = $currentPage;
-    }
-
-    /**
-     * @return int
-     */
-    public function getCurrentPage()
-    {
-        return $this->currentPage;
-    }
+    protected $omittedPagesIndicator = -1;
 
     /**
      * @param int|string $indicator
@@ -129,6 +36,20 @@ abstract class AbstractPaginationBehaviour implements PaginationBehaviourInterfa
     public function getOmittedPagesIndicator()
     {
         return $this->omittedPagesIndicator;
+    }
+
+    /**
+     * @param int $totalPages
+     * @param int $currentPage
+     *
+     * @throws \InvalidArgumentException
+     *
+     */
+    protected function guardTotalPagesAndCurrentPageAreValid($totalPages, $currentPage)
+    {
+        $this->guardTotalPagesMinimumValue($totalPages);
+        $this->guardCurrentPageMinimumValue($currentPage);
+        $this->guardCurrentPageExistsInTotalPages($totalPages, $currentPage);
     }
 
     /**
@@ -168,13 +89,13 @@ abstract class AbstractPaginationBehaviour implements PaginationBehaviourInterfa
     }
 
     /**
-     * @param int $currentPage
      * @param int $totalPages
+     * @param int $currentPage
      *
      * @throws \InvalidArgumentException
      *   If current page is higher than total number of pages.
      */
-    protected function guardCurrentPageLowerThanTotalPages($currentPage, $totalPages)
+    protected function guardCurrentPageExistsInTotalPages($totalPages, $currentPage)
     {
         if ($currentPage > $totalPages) {
             throw new \InvalidArgumentException(
@@ -211,16 +132,11 @@ abstract class AbstractPaginationBehaviour implements PaginationBehaviourInterfa
      */
     protected function guardOmittedPagesIndicatorIntValue($indicator)
     {
-        if (is_int($indicator) &&
-            !is_null($this->totalPages) &&
-            !is_null($this->currentPage) &&
-            $indicator >= 1 &&
-            $indicator <= $this->totalPages) {
+        if (is_int($indicator) && $indicator >= 1) {
             throw new \InvalidArgumentException(
                 sprintf(
-                    'Omitted pages indicator (%d) should not be between 1 and total number of pages (%d) (if int).',
-                    $indicator,
-                    $this->totalPages
+                    'Omitted pages indicator (%d) should not be higher than 0 as it may not be a possible page number.',
+                    $indicator
                 )
             );
         }
