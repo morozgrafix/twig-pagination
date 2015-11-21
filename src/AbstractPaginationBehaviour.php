@@ -142,7 +142,7 @@ abstract class AbstractPaginationBehaviour implements PaginationBehaviourInterfa
         if ($totalPages < 1) {
             throw new \InvalidArgumentException(
                 sprintf(
-                    'Total number of pages (%d) should never be lower than 1.',
+                    'Total number of pages (%d) should not be lower than 1.',
                     $totalPages
                 )
             );
@@ -160,7 +160,7 @@ abstract class AbstractPaginationBehaviour implements PaginationBehaviourInterfa
         if ($currentPage < 1) {
             throw new \InvalidArgumentException(
                 sprintf(
-                    'Current page (%d) should never be lower than 1.',
+                    'Current page (%d) should not be lower than 1.',
                     $currentPage
                 )
             );
@@ -179,7 +179,7 @@ abstract class AbstractPaginationBehaviour implements PaginationBehaviourInterfa
         if ($currentPage > $totalPages) {
             throw new \InvalidArgumentException(
                 sprintf(
-                    'Current page (%d) should never be higher than total number of pages (%d).',
+                    'Current page (%d) should not be higher than total number of pages (%d).',
                     $currentPage,
                     $totalPages
                 )
@@ -218,7 +218,7 @@ abstract class AbstractPaginationBehaviour implements PaginationBehaviourInterfa
             $indicator <= $this->totalPages) {
             throw new \InvalidArgumentException(
                 sprintf(
-                    'Omitted pages indicator (%d) should never be between 1 and total number of pages (%d) (if int).',
+                    'Omitted pages indicator (%d) should not be between 1 and total number of pages (%d) (if int).',
                     $indicator,
                     $this->totalPages
                 )
