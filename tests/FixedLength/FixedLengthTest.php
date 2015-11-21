@@ -6,10 +6,30 @@ class FixedLengthTest extends \PHPUnit_Framework_TestCase
 {
     public function testMaximumVisibleMinimumValue()
     {
+        $this->setExpectedException(
+            \InvalidArgumentException::class,
+            'Maximum of number of visible pages (6) should be at least 7.'
+        );
+
+        new FixedLength(1, 1, 6);
+    }
+
+    public function testMaximumVisibleCanBeUpdated()
+    {
+        $behaviour = new FixedLength(1, 1, 7);
+        $behaviour = $behaviour->withMaximumVisible(10);
+        $this->assertEquals(10, $behaviour->getMaximumVisible());
+    }
+
+    public function testMaximumVisibleCanNotBeLoweredToLessThanMinimumValue()
+    {
         $behaviour = new FixedLength(1, 1, 7);
 
-        // Maximum visible should be at least 7.
-        $this->setExpectedException(\InvalidArgumentException::class);
+        $this->setExpectedException(
+            \InvalidArgumentException::class,
+            'Maximum of number of visible pages (6) should be at least 7.'
+        );
+
         $behaviour->withMaximumVisible(6);
     }
 
