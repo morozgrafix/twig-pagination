@@ -8,8 +8,8 @@ display depending on the total amount of pages, the current page, and whatever
 behaviour you choose.
 
 It will not generate any HTML for you, but simply provide you with an array of
-page numbers to display as links and optionally where any chunks of omitted
-pages would be.
+page numbers to display as links and if necessary where any chunks of omitted
+pages are.
 
 For example:
 
@@ -19,7 +19,16 @@ For example:
 * **Behaviour**: `FixedLength`, 11
 * **Result**: `[1, 2, 3, -1, 29, 30, 31, -1, 48, 49, 50];`
 
-It is then up to you to display this data using a Twig template.
+It is then up to you to display this data using a Twig template. 
+(See [Usage in Twig](#usage-in-twig))
+
+# Installation
+
+Using [Composer](http://getcomposer.org):
+
+```bash
+composer require bertramakers/twig-pagination
+```
 
 # Setup
 
@@ -43,6 +52,8 @@ use \Twig_Loader_Filesystem;
 $loader = new Twig_Loader_Filesystem('/path/to/templates');
 $twig = new Twig_Environment($loader);
 
+// Configure two fixed length pagination functions, a small one and a wide one.
+// The names are completely up to you to choose.
 $paginationExtension = (new PaginationExtension())
     ->withFunction('small', new FixedLength(7))
     ->withFunction('wide', new FixedLength(21));
@@ -67,6 +78,8 @@ $app['twig'] = $app->share(
     $app->extend(
         'twig', 
         function($twig, $app) {
+            // Configure two fixed length pagination functions, a small one and
+            // a wide one. The names are completely up to you to choose.
             $paginationExtension = (new PaginationExtension())
                 ->withFunction('small', new FixedLength(7))
                 ->withFunction('wide', new FixedLength(21));
@@ -89,11 +102,93 @@ These functions are now available in Twig as `small_pagination` and `wide_pagina
 * Current page
 * Omitted pages indicator (defaults to `-1`)
 
-**Examples**:
+**Important!** The current page value uses regular numbering starting from 1,
+so if you use 0-based numbering make sure to add 1 to the current page value.
+
+## Examples:
+
+**Standard usage**:
+
 ```twig
-{% set pageLinks = wide_pagination(20, 7) %}
+{% set totalPages = 20 %}
+{% set currentPage = 8 %}
 ```
 
 ```twig
-{% set pageLinks = small_pagination(20, 7, '...') %}
+{% set paginationData = wide_pagination(totalPages, currentPage) %}
 ```
+
+**Custom indicator for omitted pages**:
+
+```twig
+{% set paginationData = small_pagination(totalPages, currentPage, '...') %}
+```
+
+**Looping over the data**:
+
+This template is just a simple example you could start from, or you could write
+one from scratch depending on your requirements.
+
+```twig
+<ul class="pagination">
+
+{% if currentPage > 1 %}
+    <li><a href="...">Previous</a></li>
+{% else %}
+    <li class="disabled">Previous</li>
+{% endif %}
+
+{% for paginationItem in paginationData %}
+    {% if paginationItem == -1 # The value you chose for omitted chunks of pages %}
+        <li class="disabled">...</li>
+    {% elseif paginationItem == currentPage %}
+        <li class="active"><a href="...">{{ paginationItem }}</a></li>
+    {% else %}
+        <li><a href="...">{{ paginationItem }}</a></li>
+    {% endif %}
+{% endfor %}
+
+{% if currentPage < totalPages %}
+    <li><a href="...">Next</a></li>
+{% else %}
+    <li class="disabled">Next</li>
+{% endif %}
+
+</ul>
+```
+
+# FAQ
+
+### Why not just put everything inside a Twig template?
+
+Using this extension, you can keep the logic for determining which page links
+to display and the actual markup for the list of links separated. This makes it
+possible to re-use the template across your application, even in places where
+the logic for which links to display is different. It also makes it a lot 
+easier to test the actual display logic.
+
+You could even use the behaviour classes outside of Twig, and use them to
+render pagination links in something else than HTML.
+
+### Can you add a zero-based numbering option?
+
+This extension's purpose is to decide what page numbers should be shown to your
+end users, so it always starts counting from 1.
+
+However if you want to use zero-based numbering for the page parameter in your 
+URLs, you can easily do so by subtracting 1 from each page number you get back.
+
+So you would still print "1" for the first page, but subtract 1 and use "0" as 
+the page parameter in the URL to the first page.
+
+### Where are the previous / next links?
+
+You should include those in your template, as they have no effect on what page
+numbers to display and which to exclude. See the template example above for an
+example on how to add previous and next links.
+
+### How do I know which page link should be disabled for the current page?
+
+You should simply loop over the page numbers you get back, and if a given page
+number equals the current page value you used when generating the pagination
+data, that's the current page that you could disable if you wanted to.
