@@ -3,8 +3,8 @@
 
 # Introduction
 
-This pagination extension helps you determine what pagination links to on a 
-give page, depending on the total amount of pages and some configurable logic.
+This extension helps you determine what pagination links to display on a given 
+page, depending on the total amount of pages and some configurable logic.
 
 It will not generate any HTML for you, but simply provide you with an array of
 page numbers to display as links and if necessary where any chunks of omitted
