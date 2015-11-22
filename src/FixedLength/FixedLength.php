@@ -75,9 +75,9 @@ final class FixedLength extends AbstractPaginationBehaviour
     /**
      * @inheritdoc
      */
-    public function getPaginationData($totalPages, $currentPage)
+    public function getPaginationData($totalPages, $currentPage, $omittedPagesIndicator = -1)
     {
-        $this->guardTotalPagesAndCurrentPageAreValid($totalPages, $currentPage);
+        $this->guardPaginationData($totalPages, $currentPage, $omittedPagesIndicator);
 
         // If the total number of pages is less than the maximum number of
         // allowed visible pages, we don't need to omit anything.
@@ -88,12 +88,12 @@ final class FixedLength extends AbstractPaginationBehaviour
         // Check if we can omit a single chunk of pages, depending on the
         // position of the current page relative to the first and last page.
         if ($this->hasSingleOmittedChunk($totalPages, $currentPage)) {
-            return $this->getPaginationDataWithSingleOmittedChunk($totalPages, $currentPage);
+            return $this->getPaginationDataWithSingleOmittedChunk($totalPages, $currentPage, $omittedPagesIndicator);
         }
 
         // Otherwise omit two chunks of pages, one on each side of the current
         // page.
-        return $this->getPaginationDataWithTwoOmittedChunks($totalPages, $currentPage);
+        return $this->getPaginationDataWithTwoOmittedChunks($totalPages, $currentPage, $omittedPagesIndicator);
     }
 
     /**
@@ -146,9 +146,10 @@ final class FixedLength extends AbstractPaginationBehaviour
     /**
      * @param int $totalPages
      * @param int $currentPage
+     * @param int|string $omittedPagesIndicator
      * @return array
      */
-    private function getPaginationDataWithSingleOmittedChunk($totalPages, $currentPage)
+    private function getPaginationDataWithSingleOmittedChunk($totalPages, $currentPage, $omittedPagesIndicator)
     {
         // Determine where the omitted chunk of pages will be.
         if ($this->hasSingleOmittedChunkNearLastPage($currentPage)) {
@@ -169,7 +170,7 @@ final class FixedLength extends AbstractPaginationBehaviour
         // Merge left side, omitted pages indicator, and right side together.
         return array_merge(
             $pagesLeft,
-            [$this->omittedPagesIndicator],
+            [$omittedPagesIndicator],
             $pagesRight
         );
     }
@@ -177,9 +178,10 @@ final class FixedLength extends AbstractPaginationBehaviour
     /**
      * @param int $totalPages
      * @param int $currentPage
+     * @param int|string $omittedPagesIndicator
      * @return array
      */
-    private function getPaginationDataWithTwoOmittedChunks($totalPages, $currentPage)
+    private function getPaginationDataWithTwoOmittedChunks($totalPages, $currentPage, $omittedPagesIndicator)
     {
         $visibleExceptForCurrent = $this->maximumVisible - 1;
 
@@ -212,9 +214,9 @@ final class FixedLength extends AbstractPaginationBehaviour
         // them.
         return array_merge(
             $pagesLeft,
-            [$this->omittedPagesIndicator],
+            [$omittedPagesIndicator],
             $pagesCenter,
-            [$this->omittedPagesIndicator],
+            [$omittedPagesIndicator],
             $pagesRight
         );
     }

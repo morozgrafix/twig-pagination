@@ -2,8 +2,18 @@
 
 namespace DevotedCode\Twig\Pagination\FixedLength;
 
-class FixedLengthTest extends \PHPUnit_Framework_TestCase
+use DevotedCode\Twig\Pagination\PaginationBehaviourTest;
+
+class FixedLengthTest extends PaginationBehaviourTest
 {
+    /**
+     * @inheritdoc
+     */
+    public function getBehaviour()
+    {
+        return new FixedLength(7);
+    }
+
     public function testMaximumVisibleMinimumValue()
     {
         $this->setExpectedException(
@@ -31,42 +41,6 @@ class FixedLengthTest extends \PHPUnit_Framework_TestCase
         );
 
         $behaviour->withMaximumVisible(6);
-    }
-
-    public function testTotalPagesMinimumValue()
-    {
-        $behaviour = new FixedLength(7);
-
-        $this->setExpectedException(
-            \InvalidArgumentException::class,
-            'Total number of pages (0) should not be lower than 1.'
-        );
-
-        $behaviour->getPaginationData(0, 1);
-    }
-
-    public function testCurrentPageMinimumValue()
-    {
-        $behaviour = new FixedLength(7);
-
-        $this->setExpectedException(
-            \InvalidArgumentException::class,
-            'Current page (0) should not be lower than 1.'
-        );
-
-        $behaviour->getPaginationData(10, 0);
-    }
-
-    public function testCurrentPageExistsInTotalPages()
-    {
-        $behaviour = new FixedLength(7);
-
-        $this->setExpectedException(
-            \InvalidArgumentException::class,
-            'Current page (11) should not be higher than total number of pages (10).'
-        );
-
-        $behaviour->getPaginationData(10, 11);
     }
 
     /**
@@ -98,10 +72,8 @@ class FixedLengthTest extends \PHPUnit_Framework_TestCase
         // Set the omission indicator to 3 dots for better test legibility.
         // Total pages, current page, and maximum visible should be
         // configured per test.
-        $behaviour = (new FixedLength($maximumVisible))
-            ->withOmittedPagesIndicator('...');
-
-        $actual = $behaviour->getPaginationData($totalPages, $currentPage);
+        $behaviour = new FixedLength($maximumVisible);
+        $actual = $behaviour->getPaginationData($totalPages, $currentPage, '...');
 
         if ($actual != $expected) {
             $this->fail(

@@ -2,37 +2,16 @@
 
 namespace DevotedCode\Twig\Pagination;
 
-class PaginationExtension extends \Twig_Extension
+final class PaginationExtension extends \Twig_Extension
 {
     /**
-     * @var string
+     * @var PaginationBehaviourInterface[]
      */
-    private $name;
+    private $functions;
 
-    /**
-     * @var PaginationBehaviourInterface
-     */
-    private $behaviour;
-
-    /**
-     * @param string $name
-     * @param PaginationBehaviourInterface $behaviour
-     */
-    public function __construct(
-        $name,
-        PaginationBehaviourInterface $behaviour
-    ) {
-        $this->setName($name);
-        $this->behaviour = $behaviour;
-    }
-
-    /**
-     * @param string $name
-     */
-    private function setName($name)
+    public function __construct()
     {
-        $name = preg_replace('/(_pagination)$/', '', (string) $name);
-        $this->name = $name . '_pagination';
+        $this->functions = [];
     }
 
     /**
@@ -40,52 +19,65 @@ class PaginationExtension extends \Twig_Extension
      */
     public function getName()
     {
-        return $this->name;
+        return 'pagination_data';
     }
 
     /**
-     * @return array
+     * @param string $functionName
+     *   Name to use for the twig function. Will be suffixed with "_pagination"
+     *   unless it's already suffixed.
+     *
+     * @param PaginationBehaviourInterface $behaviour
+     *   Pagination behaviour to use in the twig function.
+     *
+     * @return PaginationExtension
+     */
+    public function withFunction($functionName, PaginationBehaviourInterface $behaviour)
+    {
+        $functionName = $this->suffixFunctionName($functionName);
+
+        $c = clone $this;
+
+        $c->functions[$functionName] = new \Twig_SimpleFunction(
+            $functionName,
+            array($behaviour, 'getPaginationData')
+        );
+
+        return $c;
+    }
+
+    /**
+     * @param string $functionName
+     *   Name of the twig function to remove. Will be suffixed with
+     *   "_pagination" unless it's already suffixed.
+     *
+     * @return PaginationExtension
+     */
+    public function withoutFunction($functionName)
+    {
+        $functionName = $this->suffixFunctionName($functionName);
+
+        $c = clone $this;
+        unset($c->functions[$functionName]);
+        return $c;
+    }
+
+    /**
+     * @param string $functionName
+     * @return string
+     */
+    private function suffixFunctionName($functionName)
+    {
+        // Make sure the function name is not suffixed twice.
+        $functionName = preg_replace('/(_pagination)$/', '', (string) $functionName);
+        return $functionName . '_pagination';
+    }
+
+    /**
+     * @return \Twig_SimpleFunction[]
      */
     public function getFunctions()
     {
-        return array(
-            new \Twig_SimpleFunction(
-                $this->name,
-                array($this, 'getPaginationData')
-            ),
-        );
-    }
-
-    /**
-     * @param int $totalPages
-     *   Total number of pages. Should never be lower than 1.
-     *   MUST NOT be less than the current page.
-     *
-     * @param int $currentPage
-     *   Number of the current page. MUST NOT be lower than 1.
-     *   MUST NOT be higher than the total number of pages.
-     *
-     * @param int|string|bool $omittedPagesIndicator
-     *   What value to use to indicate an omitted chunk of pages.
-     *   Use false to use default value.
-     *
-     * @return array
-     *   Array of page numbers to display. Chunks of omitted pages are
-     *   indicated as -1 by default, or the value set using
-     *   withOmittedPagesIndicator().
-     */
-    public function getPaginationData(
-        $totalPages,
-        $currentPage,
-        $omittedPagesIndicator = false
-    ) {
-        $behaviour = $this->behaviour;
-
-        if ($omittedPagesIndicator) {
-            $behaviour = $this->behaviour
-                ->withOmittedPagesIndicator($omittedPagesIndicator);
-        }
-
-        return $behaviour->getPaginationData($totalPages, $currentPage);
+        return array_values($this->functions);
     }
 }

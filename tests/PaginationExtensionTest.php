@@ -2,23 +2,10 @@
 
 namespace DevotedCode\Twig\Pagination;
 
+use DevotedCode\Twig\Pagination\FixedLength\FixedLength;
+
 class PaginationExtensionTest extends \PHPUnit_Framework_TestCase
 {
-    /**
-     * @var string
-     */
-    private $extensionName;
-
-    /**
-     * @var string
-     */
-    private $extensionNameSuffixed;
-
-    /**
-     * @var PaginationBehaviourInterface|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $behaviour;
-
     /**
      * @var PaginationExtension
      */
@@ -26,33 +13,54 @@ class PaginationExtensionTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->extensionName = 'mock';
-        $this->extensionNameSuffixed = 'mock_pagination';
-        $this->behaviour = $this->getMock(PaginationBehaviourInterface::class);
+        $this->extension = new PaginationExtension();
+    }
 
-        $this->extension = new PaginationExtension(
-            $this->extensionName,
-            $this->behaviour
+    public function testExtensionName()
+    {
+        $this->assertEquals(
+            'pagination_data',
+            $this->extension->getName()
         );
     }
 
-    public function testNaming()
+    public function testFunctionConfiguration()
     {
-        // Make sure the extension's name is suffixed with '_pagination'.
-        $this->assertEquals($this->extensionNameSuffixed, $this->extension->getName());
+        // Should not have any functions by default.
+        $this->assertEquals([], $this->extension->getFunctions());
 
-        // Make sure the extension's name is never suffixed twice.
-        $extension = new PaginationExtension($this->extensionNameSuffixed, $this->behaviour);
-        $this->assertEquals($this->extensionNameSuffixed, $extension->getName());
-    }
+        // Should be able to add functions with a custom name.
+        $small = new FixedLength(7);
+        $large = new FixedLength(21);
 
-    public function testFunctionInfo()
-    {
+        $this->extension = $this->extension
+            ->withFunction('small', $small)
+            ->withFunction('large', $large);
+
         $expected = [
             new \Twig_SimpleFunction(
-                $this->extensionNameSuffixed,
-                array($this->extension, 'getPaginationData')
-            )
+                'small_pagination',
+                array($small, 'getPaginationData')
+            ),
+            new \Twig_SimpleFunction(
+                'large_pagination',
+                array($large, 'getPaginationData')
+            ),
+        ];
+
+        $actual = $this->extension->getFunctions();
+
+        $this->assertEquals($expected, $actual);
+
+        // Should be able to remove functions by their non-suffixed name.
+        $this->extension = $this->extension
+            ->withoutFunction('small');
+
+        $expected = [
+            new \Twig_SimpleFunction(
+                'large_pagination',
+                array($large, 'getPaginationData')
+            ),
         ];
 
         $actual = $this->extension->getFunctions();
@@ -60,44 +68,20 @@ class PaginationExtensionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function testPaginationDataFunction()
+    public function testFunctionIsCallable()
     {
-        $totalPages = 20;
-        $currentPage = 10;
-        $expected = [1, -1, 10, -1, 20];
+        $this->extension = $this->extension
+            ->withFunction('small', new FixedLength(7));
 
-        $this->behaviour->expects($this->once())
-            ->method('getPaginationData')
-            ->with($totalPages, $currentPage)
-            ->willReturn($expected);
+        $twigFunctions = $this->extension->getFunctions();
+        $twigFunction = $twigFunctions[0];
+        $callable = $twigFunction->getCallable();
 
-        $actual = $this->extension->getPaginationData($totalPages, $currentPage);
+        $totalPages = 4;
+        $currentPage = 1;
+        $expected = [1, 2, 3, 4];
 
-        $this->assertEquals($expected, $actual);
-    }
-
-    public function testPaginationDataFunctionWithOmittedPagesIndicator()
-    {
-        $totalPages = 20;
-        $currentPage = 10;
-        $omittedPagesIndicator = '...';
-        $expected = [1, '...', 10, '...', 20];
-
-        $this->behaviour->expects($this->once())
-            ->method('withOmittedPagesIndicator')
-            ->with($omittedPagesIndicator)
-            ->willReturn($this->behaviour);
-
-        $this->behaviour->expects($this->once())
-            ->method('getPaginationData')
-            ->with($totalPages, $currentPage)
-            ->willReturn($expected);
-
-        $actual = $this->extension->getPaginationData(
-            $totalPages,
-            $currentPage,
-            $omittedPagesIndicator
-        );
+        $actual = call_user_func($callable, $totalPages, $currentPage);
 
         $this->assertEquals($expected, $actual);
     }
