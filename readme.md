@@ -3,9 +3,8 @@
 
 # Introduction
 
-This pagination extension provides a way to determine what pagination links to
-display depending on the total amount of pages, the current page, and whatever
-behaviour you choose.
+This pagination extension helps you determine what pagination links to on a 
+give page, depending on the total amount of pages and some configurable logic.
 
 It will not generate any HTML for you, but simply provide you with an array of
 page numbers to display as links and if necessary where any chunks of omitted
@@ -21,6 +20,10 @@ For example:
 
 It is then up to you to display this data using a Twig template. 
 (See [Usage in Twig](#usage-in-twig))
+
+It's important to note that this extension **will not help you help you load or
+filter the data you want to paginate**. It's simply meant to help you decide 
+what links to other pages you should display on a given page.
 
 # Installation
 
