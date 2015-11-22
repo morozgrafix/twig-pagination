@@ -68,6 +68,25 @@ class PaginationExtensionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function testFunctionNameIsNotSuffixedTwice()
+    {
+        $small = new FixedLength(7);
+
+        $this->extension = $this->extension
+            ->withFunction('small_pagination', $small);
+
+        $expected = [
+            new \Twig_SimpleFunction(
+                'small_pagination',
+                array($small, 'getPaginationData')
+            ),
+        ];
+
+        $actual = $this->extension->getFunctions();
+
+        $this->assertEquals($expected, $actual);
+    }
+
     public function testFunctionIsCallable()
     {
         $this->extension = $this->extension
