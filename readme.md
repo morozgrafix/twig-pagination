@@ -139,7 +139,7 @@ one from scratch depending on your requirements.
 {% endif %}
 
 {% for paginationItem in paginationData %}
-    {% if paginationItem == -1 # The value you chose for omitted chunks of pages %}
+    {% if paginationItem == -1 %} {# The value you chose for omitted chunks #}
         <li class="disabled">...</li>
     {% elseif paginationItem == currentPage %}
         <li class="active"><a href="...">{{ paginationItem }}</a></li>
