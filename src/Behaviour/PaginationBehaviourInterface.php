@@ -1,6 +1,6 @@
 <?php
 
-namespace DevotedCode\Twig\Pagination;
+namespace DevotedCode\Twig\Pagination\Behaviour;
 
 interface PaginationBehaviourInterface
 {

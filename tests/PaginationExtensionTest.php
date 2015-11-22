@@ -2,7 +2,7 @@
 
 namespace DevotedCode\Twig\Pagination;
 
-use DevotedCode\Twig\Pagination\FixedLength\FixedLength;
+use DevotedCode\Twig\Pagination\Behaviour\FixedLength;
 
 class PaginationExtensionTest extends \PHPUnit_Framework_TestCase
 {

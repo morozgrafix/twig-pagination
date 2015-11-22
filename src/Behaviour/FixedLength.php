@@ -1,8 +1,6 @@
 <?php
 
-namespace DevotedCode\Twig\Pagination\FixedLength;
-
-use DevotedCode\Twig\Pagination\AbstractPaginationBehaviour;
+namespace DevotedCode\Twig\Pagination\Behaviour;
 
 final class FixedLength extends AbstractPaginationBehaviour
 {

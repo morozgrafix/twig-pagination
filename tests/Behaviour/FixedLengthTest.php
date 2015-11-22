@@ -1,8 +1,6 @@
 <?php
 
-namespace DevotedCode\Twig\Pagination\FixedLength;
-
-use DevotedCode\Twig\Pagination\PaginationBehaviourTest;
+namespace DevotedCode\Twig\Pagination\Behaviour;
 
 class FixedLengthTest extends PaginationBehaviourTest
 {

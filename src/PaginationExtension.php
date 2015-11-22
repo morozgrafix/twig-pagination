@@ -2,6 +2,8 @@
 
 namespace DevotedCode\Twig\Pagination;
 
+use DevotedCode\Twig\Pagination\Behaviour\PaginationBehaviourInterface;
+
 final class PaginationExtension extends \Twig_Extension
 {
     /**

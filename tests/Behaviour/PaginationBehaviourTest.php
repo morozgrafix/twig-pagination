@@ -1,6 +1,6 @@
 <?php
 
-namespace DevotedCode\Twig\Pagination;
+namespace DevotedCode\Twig\Pagination\Behaviour;
 
 abstract class PaginationBehaviourTest extends \PHPUnit_Framework_TestCase
 {
