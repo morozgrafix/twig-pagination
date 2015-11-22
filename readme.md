@@ -160,6 +160,29 @@ one from scratch depending on your requirements.
 </ul>
 ```
 
+# Usage outside of Twig
+
+You can easily use the display logic outside of Twig:
+
+```php
+use DevotedCode\Twig\Pagination\Behaviour\FixedLength;
+
+$behaviour = new FixedLength(21);
+
+$totalPages = 50;
+$currentPage = 8;
+$omittedPagesIndicator = -1; // Optional, defaults to -1.
+
+$paginationData = $behaviour->getPaginationData(
+    $totalPages, 
+    $currentPage, 
+    $omittedPagesIndicator
+);
+```
+
+After this it's a matter of rendering the pagination links using a template
+language of your choice.
+
 # FAQ
 
 ### Why not just put everything inside a Twig template?
