@@ -192,3 +192,13 @@ example on how to add previous and next links.
 You should simply loop over the page numbers you get back, and if a given page
 number equals the current page value you used when generating the pagination
 data, that's the current page that you could disable if you wanted to.
+
+# Contributing
+
+Run a full test (lint check, coding standards check and unit tests) with 
+`./vendor/bin/phing test`.
+
+Check code coverage with `./vendor/bin/phpunit --coverage-html build` and open `./build/index.html`.
+
+In order to automatically run a full test when committing to git, install the
+included git hooks hook with `./vendor/bin/phing githooks`.
